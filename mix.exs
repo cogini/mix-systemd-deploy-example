@@ -44,6 +44,7 @@ defmodule MixSystemdDeploy.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:distillery, "~> 2.0"},
+      {:mix_deploy, "~> 0.1.0"},
     ]
   end
 
