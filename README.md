@@ -89,8 +89,7 @@ config :phoenix, :serve_endpoints, true
 Modify `rel/vm.args` to increase network ports and set node name dynamically,
 getting IP address from environment.
 
-
-Modify `rel/config.exs` to specify runtime config in [TOML](https://github.com/bitwalker/toml-elixir) or 
+Modify `rel/config.exs` to specify runtime config in [TOML](https://github.com/bitwalker/toml-elixir) or
 [Mix.Config](https://hexdocs.pm/distillery/Mix.Releases.Config.Providers.Elixir.html) format:
 
 ```elixir
@@ -180,154 +179,93 @@ Reference the task, above:
 release_ctl eval "MixSystemdDeploy.Tasks.migrate(:init.get_plain_arguments())"
 ```
 
+## Generate runtime configuration
 
-## Generate environment 
-/etc/mix-systemd-deploy/config.toml
-/etc/mix-systemd-deploy/erlang.cookie
-EnvironmentFile=-/etc/mix-systemd-deploy/environment
-EnvironmentFile=-/run/mix-systemd-deploy/runtime-environment
+Set runtime app user of `app` and deploy user of `deploy`, instead of using the
+current user.
 
+Assume that are running with `cloud-init`, and run a wrapper script to set env
+var with the IP to make the node name unique, so enable `deploy-runtime-environment-wrap`.
+Set `REPLACE_OS_VARS=true` to have the `DEFAULT_IPV4` variable replaced in `rel/vm.args`.
 
+This config assumes that the main runtime config files will be in
+`/etc/mix-systemd-deploy`.  We need to get the files there, so we enable the
+`deploy-sync-config-s3` script and tell it which S3 bucket to read from with
+the `CONFIG_S3_BUCKET` and `CONFIG_S3_PREFIX` environment vars.
 
-
-
-## Set up ASDF
-
-Add the `.tool-versions` file to specify versions of Elixir and Erlang.
-
-
-## Add Ansible
-
-Add the Ansible tasks to set up the servers and deploy code, in the `ansible`
-directory. Configure the vars in the inventory.
-
-This repository contains local copies of roles from Ansible Galaxy in
-`roles.galaxy`. To install them, run:
-
-```shell
-ansible-galaxy install --roles-path roles.galaxy -r install_roles.yml
-```
-
-## Add mix tasks for local deploy
-
-Add `lib/mix/tasks/deploy.ex`
-
-## Add Conform for configuration
-
-Add [Conform](https://github.com/bitwalker/conform) to `deps` in `mix.exs`:
+Setting `DEFAULT_COOKIE_FILE` assumes that the file is generated and put into
+`/etc/mix-systemd-deploy/erlang.cookie`. If you don't set this, the Erlang VM
+will genrate a cookie and put it in `$HOME/.erlang.cookie`. Setting it means
+that you cqn connect remotely to the server with this cookie, and machines in the
+cluster use the cookie.
 
 ```elixir
- {:conform, "~> 2.2"}
-```
-
-Generate schema to the `config/deploy_template.schema.exs` file.
-
-```elixir
-MIX_ENV=prod mix conform.new
-```
-
-Generate a sample `deploy_template.prod.conf` file:
-
-```elixir
-MIX_ENV=prod mix conform.configure
-```
-
-Integrate with Distillery, by adding `plugin Conform.ReleasePlugin`
-to `rel/config.exs`:
-
-```elixir
-release :deploy_template do
-  set version: current_version(:deploy_template)
-  set applications: [
-    :runtime_tools
+config :mix_systemd,
+  app_user: "app",
+  app_group: "app",
+  runtime_environment_wrap: true,
+  env_vars: [
+    "REPLACE_OS_VARS=true",
+    "DEFAULT_COOKIE_FILE=/etc/mix-systemd-deploy/erlang.cookie",
+    "CONFIG_S3_BUCKET=cogini-test",
+    "CONFIG_S3_PREFIX=mix-systemd-deploy",
+  ],
+  exec_start_pre: [
+    "deploy-sync-config-s3"
   ]
-  plugin Conform.ReleasePlugin
-end
+
+config :mix_deploy,
+  deploy_user: "deploy",
+  deploy_group: "deploy",
+  app_user: "app",
+  app_group: "app"
 ```
 
-## Add shutdown_flag library
+Add `bin/validate-service` script.
 
-This supports restarting the app after deploying a release [without needing
-sudo permissions](https://www.cogini.com/blog/deploying-elixir-apps-without-sudo/).
+Add `appspec.yml`
 
-Add [shutdown_flag](https://github.com/cogini/shutdown_flag) to `mix.exs`:
-
-    {:shutdown_flag, github: "cogini/shutdown_flag"},
-
-Add to `config/prod.exs`:
-
-```elixir
-config :shutdown_flag,
-  flag_file: "/var/tmp/deploy/deploy-template/shutdown.flag",
-  check_delay: 10_000
+```yaml
+version: 0.0
+os: linux
+files:
+  - source: bin
+    destination: /srv/mix-systemd-deploy/bin
+  - source: systemd
+    destination: /lib/systemd/system
+hooks:
+  ApplicationStop:
+    - location: bin/deploy-stop
+      timeout: 300
+  BeforeInstall:
+    - location: bin/deploy-create-users
+    - location: bin/deploy-clean-target
+  AfterInstall:
+    - location: bin/deploy-extract-release
+    - location: bin/deploy-set-perms
+    - location: bin/deploy-enable
+  ApplicationStart:
+    # - location: bin/deploy-migrate
+    #     runas: app
+    #     timeout: 300
+    - location: bin/deploy-start
+      timeout: 3600
+  ValidateService:
+    - location: bin/validate-service
+      timeout: 3600
 ```
 
-# TL;DR
+Add secrets:
 
-Once you have configured Ansible, set up the servers:
+`/etc/mix-systemd-deploy/config.toml`
+
+See `config/config.toml.sample`
+
+`/etc/mix-systemd-deploy/erlang.cookie`
 
 ```shell
-ansible-playbook -u root -v -l web-servers playbooks/setup-web.yml -D
-ansible-playbook -u root -v -l web-servers playbooks/deploy-app.yml --skip-tags deploy -D
-ansible-playbook -u root -v -l web-servers playbooks/config-web.yml -D
-ansible-playbook -u root -v -l build-servers playbooks/setup-build.yml -D
-ansible-playbook -u root -v -l build-servers playbooks/setup-db.yml -D
-ansible-playbook -u root -v -l build-servers playbooks/config-build.yml -D
+mix phx.gen.secret 32
 ```
 
-Build and deploy the code:
-
-```shell
-# Check out latest code and build release on server
-ssh -A deploy@build-server build/deploy-template/scripts/build-release.sh
-
-# Deploy release
-ssh -A deploy@build-server build/deploy-template/scripts/deploy-local.sh
-```
-
-# MixSystemdDeploy
-
-To start your Phoenix server:
-
-  * Install dependencies with `mix deps.get`
-  * Create and migrate your database with `mix ecto.setup`
-  * Install Node.js dependencies with `cd assets && npm install`
-  * Start Phoenix endpoint with `mix phx.server`
-
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
-
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
-
-## Learn more
-
-  * Official website: http://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Mailing list: http://groups.google.com/group/phoenix-talk
-  * Source: https://github.com/phoenixframework/phoenix
-
-
-Other options:
-
-Implement [Mix.Config config file](https://hexdocs.pm/distillery/Mix.Releases.Config.Providers.Elixir.html):
-
-```elixir
-set config_providers: [
-    # Config file in standard systemd `configuration_directory`
-    # {Mix.Releases.Config.Providers.Elixir, ["/etc/mix-systemd-deploy/config.exs"]}
-
-    # Config file under release directory
-    # {Mix.Releases.Config.Providers.Elixir, ["${RELEASE_ROOT_DIR}/etc/config.exs"]}
-]
-```
-
-```elixir
-# We source control our service file, overlay it into the release tarball
-# and it is expected that this path will be symlinked to the appropriate systemd service
-# directory on the target
-set overlays: [
-  {:mkdir, "etc"},
-  {:copy, "rel/etc/config.exs", "etc/config.exs"},
-  {:template, "rel/etc/environment", "etc/environment"}
-]
-```
+The wrapper script `deploy-runtime-environment-file` generates
+`/run/mix-systemd-deploy/runtime-environment`.
