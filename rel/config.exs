@@ -47,7 +47,7 @@ environment :prod do
 
   # Runtime config
   set config_providers: [
-    {Toml.Provider, [path: "/etc/mix-systemd-deploy/config.toml"},
+    {Toml.Provider, [path: "/etc/mix-systemd-deploy/config.toml"]},
     # {Mix.Releases.Config.Providers.Elixir, ["/etc/mix-systemd-deploy/config.exs"]},
   ]
 end
