@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# Extract release
+# CodeDeploy
+
+set -e
+
+export LANG="en_US.UTF-8"
+
+# Environment vars
+# DESTDIR, prefix for target files, optional
+
+# Config vars
+DEPLOY_DIR="/srv/mix-systemd-deploy"
+APP_NAME="mix_systemd_deploy"
+DEPLOY_USER="${DEPLOY_USER:-jake}"
+APP_GROUP="${APP_USER:-staff}"
+
+CURDIR="$PWD"
+BINDIR=$(dirname "$0")
+cd "$BINDIR"; BINDIR="$PWD"; cd "$CURDIR"
+
+CURRENT_DIR="${DESTDIR}${DEPLOY_DIR}/current"
+TAR_FILE="$BINDIR/../${APP_NAME}.tar.gz"
+
+echo "==> Removing previous release $CURRENT_DIR"
+rm -rf "$CURRENT_DIR"
+
+echo "==> Extracting release from tar file $TAR_FILE"
+mkdir -p "$CURRENT_DIR"
+tar -C "$CURRENT_DIR" -xzf "$TAR_FILE"
+chown -R ${DEPLOY_USER}:${APP_GROUP} "${CURRENT_DIR}"
+
+# Clean up archive
+# rm "$TAR_FILE"

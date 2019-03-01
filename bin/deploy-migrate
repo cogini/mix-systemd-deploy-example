@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# Migrate database on target system
+
+set -e
+
+# Config vars
+DEPLOY_DIR="/srv/mix-systemd-deploy"
+RUNTIME_DIR="/run/mix-systemd-deploy"
+APP_NAME="mix_systemd_deploy"
+
+CURRENT_DIR="${DEPLOY_DIR}/current"
+cd "$CURRENT_DIR" || exit 1
+
+RUNTIME_ENVIRONMENT_FILE="${RUNTIME_DIR}/runtime-environment"
+if [ -f "$RUNTIME_ENVIRONMENT_FILE" ]; then
+    source "$RUNTIME_ENVIRONMENT_FILE"
+fi
+
+$CURRENT_DIR/bin/$APP_NAME migrate

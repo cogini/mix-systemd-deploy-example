@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+# Create user accounts on target
+
+set -e
+
+export LANG="en_US.UTF-8"
+
+# Config vars
+DEPLOY_USER="${DEPLOY_USER:-jake}"
+APP_USER="${APP_USER:-jake}"
+
+id -u "$DEPLOY_USER" &>/dev/null || useradd "$DEPLOY_USER"
+if [ "$APP_USER" != "$DEPLOY_USER" ]; then
+    id -u "$APP_USER" &>/dev/null || useradd "$APP_USER"
+fi

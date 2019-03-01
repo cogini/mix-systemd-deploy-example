@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+# Create app dirs on target
+
+set -e
+
+export LANG="en_US.UTF-8"
+
+# Environment vars
+# DESTDIR, prefix for target files, optional
+
+# Base dir
+echo "==> Creating dir ${DESTDIR}/srv/mix-systemd-deploy"
+mkdir -p "${DESTDIR}/srv/mix-systemd-deploy"
+chown $DEPLOY_USER:$APP_GROUP "${DESTDIR}/srv/mix-systemd-deploy"
+chmod 750 "${DESTDIR}/srv/mix-systemd-deploy"
+
+# Releases
+echo "==> Creating dir ${DESTDIR}/srv/mix-systemd-deploy/releases"
+mkdir -p "${DESTDIR}/srv/mix-systemd-deploy/releases"
+chown $DEPLOY_USER:$APP_GROUP "${DESTDIR}/srv/mix-systemd-deploy/releases"
+chmod 750 "${DESTDIR}/srv/mix-systemd-deploy/releases"
+
+# Target scripts
+echo "==> Creating dir ${DESTDIR}/srv/mix-systemd-deploy/bin"
+mkdir -p "${DESTDIR}/srv/mix-systemd-deploy/bin"
+chown $DEPLOY_USER:$APP_GROUP "${DESTDIR}/srv/mix-systemd-deploy/bin"
+chmod 750 "${DESTDIR}/srv/mix-systemd-deploy/bin"
+
