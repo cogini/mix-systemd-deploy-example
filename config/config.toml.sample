@@ -1,0 +1,10 @@
+[mix_systemd_deploy."MixSystemdDeploy.Repo"]
+username = "foo"
+password = "BPcKaKRdq2yF11jr"
+database = "foo-prod"
+hostname = "db.foo.internal"
+ssl = true
+pool_size = 15
+
+[mix_systemd_deploy."MixSystemdDeploy.Endpoint"]
+secret_key_base = "SLDMGiOXFlPIgEfYQjvXPrqGOIypIAqIPrtJisFUZuFuOFR3PHYPcEXib9YJlUKj"
