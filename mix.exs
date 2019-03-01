@@ -45,6 +45,7 @@ defmodule MixSystemdDeploy.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:distillery, "~> 2.0"},
       {:mix_deploy, "~> 0.1.0"},
+      {:toml, "~> 0.5.2"},
     ]
   end
 

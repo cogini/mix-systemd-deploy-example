@@ -39,6 +39,11 @@ environment :prod do
   set include_src: false
   set cookie: :"S}ek9N1H[eclz=Klj@uf&2~R_D$WFnsY*9o^cPv/XBUnX8jzP&A~mZCRi2/P:56."
   set vm_args: "rel/vm.args"
+
+  # Runtime config
+  set config_providers: [
+    {Toml.Provider, [path: "/etc/mix-systemd-deploy/config.toml"}
+  ]
 end
 
 # You may define one or more releases in this file.
@@ -52,4 +57,3 @@ release :mix_systemd_deploy do
     :runtime_tools
   ]
 end
-
