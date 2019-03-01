@@ -64,6 +64,12 @@ config :mix_systemd,
   runtime_environment_wrap: true,
   env_vars: [
     "REPLACE_OS_VARS=true",
+    "DEFAULT_COOKIE_FILE=/etc/mix-systemd-deploy/erlang.cookie",
+    "CONFIG_S3_BUCKET=cogini-test",
+    "CONFIG_S3_PREFIX=mix-systemd-deploy",
+  ],
+  exec_start_pre: [
+    "deploy-sync-config-s3"
   ]
 
 config :mix_deploy,
