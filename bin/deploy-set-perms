@@ -12,8 +12,8 @@ export LANG="en_US.UTF-8"
 
 # Config vars
 DEPLOY_DIR="/srv/mix-systemd-deploy"
-DEPLOY_USER="${DEPLOY_USER:-jake}"
-APP_GROUP="${APP_USER:-staff}"
+DEPLOY_USER="${DEPLOY_USER:-deploy}"
+APP_GROUP="${APP_USER:-app}"
 
 chmod 750 "$DEPLOY_DIR"
 chown $DEPLOY_USER:$APP_GROUP "$DEPLOY_DIR"

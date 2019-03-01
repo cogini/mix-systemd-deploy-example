@@ -13,8 +13,8 @@ export LANG="en_US.UTF-8"
 # Config vars
 DEPLOY_DIR="/srv/mix-systemd-deploy"
 APP_NAME="mix_systemd_deploy"
-DEPLOY_USER="${DEPLOY_USER:-jake}"
-APP_GROUP="${APP_USER:-staff}"
+DEPLOY_USER="${DEPLOY_USER:-deploy}"
+APP_GROUP="${APP_USER:-app}"
 
 CURDIR="$PWD"
 BINDIR=$(dirname "$0")

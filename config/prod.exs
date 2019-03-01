@@ -58,6 +58,20 @@ config :logger, level: :info
 
 config :phoenix, :serve_endpoints, true
 
+config :mix_systemd,
+  app_user: "app",
+  app_group: "app",
+  runtime_environment_wrap: true,
+  env_vars: [
+    "REPLACE_OS_VARS=true",
+  ]
+
+config :mix_deploy,
+  deploy_user: "deploy",
+  deploy_group: "deploy",
+  app_user: "app",
+  app_group: "app"
+
 # Alternatively, you can configure exactly which server to
 # start per endpoint:
 #

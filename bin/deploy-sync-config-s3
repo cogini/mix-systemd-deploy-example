@@ -7,8 +7,8 @@ set -e
 # Config vars
 export LANG="en_US.UTF-8"
 CONFIG_DIR="/etc/mix-systemd-deploy"
-APP_USER="${APP_USER:-jake}"
-APP_GROUP="${APP_USER:-staff}"
+APP_USER="${APP_USER:-app}"
+APP_GROUP="${APP_USER:-app}"
 
 # Env vars
 # CONFIG_S3_BUCKET: bucket name
