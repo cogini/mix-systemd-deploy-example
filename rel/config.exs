@@ -40,6 +40,11 @@ environment :prod do
   set cookie: :"S}ek9N1H[eclz=Klj@uf&2~R_D$WFnsY*9o^cPv/XBUnX8jzP&A~mZCRi2/P:56."
   set vm_args: "rel/vm.args"
 
+  # Custom commands
+  set commands: [
+    migrate: "rel/commands/migrate.sh"
+  ]
+
   # Runtime config
   set config_providers: [
     {Toml.Provider, [path: "/etc/mix-systemd-deploy/config.toml"}
