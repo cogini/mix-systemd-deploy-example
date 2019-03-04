@@ -181,17 +181,21 @@ release_ctl eval "MixSystemdDeploy.Tasks.migrate(:init.get_plain_arguments())"
 
 ## Generate runtime configuration
 
+### Runtime users
+
 Set runtime `app_user` to `app`. The deploy user defaults to the current user account.
 You can also set `deploy_user` to something like `deploy`.
 
-Assume that are running with `cloud-init`, and run a wrapper script to set env
-var with the IP to make the node name unique, so enable `deploy-runtime-environment-wrap`.
-Set `REPLACE_OS_VARS=true` to have the `DEFAULT_IPV4` variable replaced in `rel/vm.args`.
+```elixir
+config :mix_systemd,
+  app_user: "app",
+  app_group: "app"
 
-The runtime environment scripts use `jq` to parse the `cloud-init` data, so install it:
-
-```shell
-apt install jq
+config :mix_deploy,
+  deploy_user: "deploy",
+  deploy_group: "deploy",
+  app_user: "app",
+  app_group: "app"
 ```
 
 Assume that the runtime config will be a TOML file in `/etc/mix-systemd-deploy/config.toml`.
@@ -205,6 +209,33 @@ the `CONFIG_S3_BUCKET` and `CONFIG_S3_PREFIX` environment vars.
 apt install awscli
 ```
 
+### Setting unique node name
+
+If the app runs in a cluster, we need to set a unique node name.
+
+In `rel/vm.args`, comment out
+
+    -name <%= release_name %>@127.0.0.1
+
+And uncomment:
+
+    -name <%= release_name %>@${DEFAULT_IPV4}
+
+We use `cloud-init` to get the runtime configuration. It gets information about the machine
+and writes it to `/run/cloud-init/instance-data.json`. The `deploy-runtime-environment-wrap`.
+script reads this file on startup and uses it to set the `DEFAULT_IPV4` environment var.
+With the environment var `REPLACE_OS_VARS=true`, Distillery replaces the variable in `rel/vm.args`
+with the value on startup.
+
+The scripts `jq` to parse the `cloud-init` data, so install it:
+
+```shell
+apt install jq
+```
+
+In `config/prod.exs` for `mix_systemd` we set `runtime_environment_wrap: true`
+and `env_vars: ["REPLACE_OS_VARS=true"]`, e.g.
+
 ```elixir
 config :mix_systemd,
   app_user: "app",
@@ -212,7 +243,6 @@ config :mix_systemd,
   runtime_environment_wrap: true,
   env_vars: [
     "REPLACE_OS_VARS=true",
-    "DEFAULT_COOKIE_FILE=/etc/mix-systemd-deploy/erlang.cookie",
     "CONFIG_S3_BUCKET=cogini-test",
     "CONFIG_S3_PREFIX=mix-systemd-deploy",
   ],
