@@ -31,7 +31,7 @@ defmodule MixSystemdDeploy.Tasks.Migrate do
 
     opts = [all: true]
     # CHANGEME
-    pool = CloudNative.Repo.config[:pool]
+    pool = MixSystemdDeploy.Repo.config[:pool]
     if function_exported?(pool, :unboxed_run, 2) do
       pool.unboxed_run(@repo_module, fn -> Ecto.Migrator.run(@repo_module, migrations_dir, :up, opts) end)
     else
