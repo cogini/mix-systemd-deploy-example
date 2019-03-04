@@ -7,10 +7,17 @@ set -e
 export LANG="en_US.UTF-8"
 
 # Config vars
-DEPLOY_USER="${DEPLOY_USER:-deploy}"
+DEPLOY_USER="${DEPLOY_USER:-jake}"
 APP_USER="${APP_USER:-app}"
 
-id -u "$DEPLOY_USER" &>/dev/null || useradd "$DEPLOY_USER"
+if [ ! id -u "$DEPLOY_USER" &>/dev/null ]; then
+    echo "==> Creating deploy user $DEPLOY_USER"
+    useradd -m "$DEPLOY_USER"
+fi
+
 if [ "$APP_USER" != "$DEPLOY_USER" ]; then
-    id -u "$APP_USER" &>/dev/null || useradd "$APP_USER"
+    if [ ! id -u "$APP_USER" &>/dev/null ]; then
+        echo "==> Creating deploy user $APP_USER"
+        useradd -m "$APP_USER"
+    fi
 fi

@@ -14,7 +14,7 @@ VERSION="${VERSION:-0.1.0}"
 # Config vars
 DEPLOY_DIR="/srv/mix-systemd-deploy"
 APP_NAME="mix_systemd_deploy"
-DEPLOY_USER="${DEPLOY_USER:-deploy}"
+DEPLOY_USER="${DEPLOY_USER:-jake}"
 APP_GROUP="${APP_USER:-app}"
 
 CURRENT_LINK="${DESTDIR}${DEPLOY_DIR}/current"
@@ -28,7 +28,7 @@ mkdir -p "$RELEASE_DIR"
 
 echo "===> Extracting release from tar file $TAR_FILE"
 tar -C "$RELEASE_DIR" -xf "$TAR_FILE"
-chown -R ${DEPLOY_USER}:${APP_GROUP} "${CURRENT_LINK}"
+chown -R ${DEPLOY_USER}:${APP_GROUP} "${RELEASE_DIR}"
 
 echo "===> Setting current symlink $CURRENT_LINK"
 if [[ -L "$CURRENT_LINK" ]]; then
