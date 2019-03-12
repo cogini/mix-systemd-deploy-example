@@ -15,14 +15,14 @@ defmodule MixSystemdDeploy.Tasks.Migrate do
 
     # Start requisite apps
     IO.puts "==> Starting applications.."
-    for app <- [:crypto, :ssl, :postgrex, :ecto] do
+    for app <- [:crypto, :ssl, :postgrex, :ecto, :ecto_sql] do
       {:ok, res} = Application.ensure_all_started(app)
       IO.puts "==> Started #{app}: #{inspect res}"
     end
 
     # Start the repo
     IO.puts "==> Starting repo"
-    {:ok, _pid} = apply(@repo_module, :start_link, [pool_size: 1, log: true, log_sql: true])
+    {:ok, _pid} = apply(@repo_module, :start_link, [[pool_size: 1, log: :info, log_sql: true]])
 
     # Run the migrations for the repo
     IO.puts "==> Running migrations"
@@ -31,7 +31,7 @@ defmodule MixSystemdDeploy.Tasks.Migrate do
 
     opts = [all: true]
     # CHANGEME
-    pool = CloudNative.Repo.config[:pool]
+    pool = MixSystemdDeploy.Repo.config[:pool]
     if function_exported?(pool, :unboxed_run, 2) do
       pool.unboxed_run(@repo_module, fn -> Ecto.Migrator.run(@repo_module, migrations_dir, :up, opts) end)
     else
