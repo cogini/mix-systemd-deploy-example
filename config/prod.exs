@@ -58,25 +58,37 @@ config :logger, level: :info
 
 config :phoenix, :serve_endpoints, true
 
-config :mix_systemd,
-  app_user: "app",
-  app_group: "app",
-  runtime_environment_wrap: true,
-  env_vars: [
-    "REPLACE_OS_VARS=true",
-    "DEFAULT_COOKIE_FILE=/etc/mix-systemd-deploy/erlang.cookie",
-    "CONFIG_S3_BUCKET=cogini-test",
-    "CONFIG_S3_PREFIX=mix-systemd-deploy",
-  ],
-  exec_start_pre: [
-    "deploy-sync-config-s3"
-  ]
-
 config :mix_deploy,
-  deploy_user: "deploy",
-  deploy_group: "deploy",
   app_user: "app",
   app_group: "app"
+
+# Minimal
+config :mix_systemd,
+  app_user: "app",
+  app_group: "app"
+
+# Dynamic node name based on IP from from cloud-init
+# config :mix_systemd,
+#   app_user: "app",
+#   app_group: "app",
+#   runtime_environment_wrap: true,
+#   env_vars: [
+#     "REPLACE_OS_VARS=true",
+#   ]
+
+# Sync config from S3
+# config :mix_systemd,
+#   app_user: "app",
+#   app_group: "app",
+#   runtime_environment_wrap: true,
+#   env_vars: [
+#     "REPLACE_OS_VARS=true",
+#     "CONFIG_S3_BUCKET=cogini-test",
+#     "CONFIG_S3_PREFIX=mix-systemd-deploy",
+#   ]
+#  exec_start_pre: [
+#     "deploy-sync-config-s3"
+#  ]
 
 # Alternatively, you can configure exactly which server to
 # start per endpoint:

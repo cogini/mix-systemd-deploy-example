@@ -74,7 +74,7 @@ MIX_ENV=prod mix deploy.generate
 chmod +x bin/*
 ```
 
-Check in files under `rel/templates` and `bin` to source control.
+Check files under `rel/templates` and `bin` into source control.
 
 ## Configure system
 
@@ -154,7 +154,7 @@ defmodule MixSystemdDeploy.Tasks.Migrate do
 
     opts = [all: true]
     # CHANGEME
-    pool = CloudNative.Repo.config[:pool]
+    pool = MixSystemdDeploy.Repo.config[:pool]
     if function_exported?(pool, :unboxed_run, 2) do
       pool.unboxed_run(@repo_module, fn -> Ecto.Migrator.run(@repo_module, migrations_dir, :up, opts) end)
     else
@@ -181,23 +181,60 @@ release_ctl eval "MixSystemdDeploy.Tasks.migrate(:init.get_plain_arguments())"
 
 ## Generate runtime configuration
 
-Set runtime app user of `app` and deploy user of `deploy`, instead of using the
-current user.
+### Runtime users
 
-Assume that are running with `cloud-init`, and run a wrapper script to set env
-var with the IP to make the node name unique, so enable `deploy-runtime-environment-wrap`.
-Set `REPLACE_OS_VARS=true` to have the `DEFAULT_IPV4` variable replaced in `rel/vm.args`.
+Set runtime `app_user` to `app`. The deploy user defaults to the current user account.
+You can also set `deploy_user` to something like `deploy`.
 
-This config assumes that the main runtime config files will be in
-`/etc/mix-systemd-deploy`.  We need to get the files there, so we enable the
+```elixir
+config :mix_systemd,
+  app_user: "app",
+  app_group: "app"
+
+config :mix_deploy,
+  deploy_user: "deploy",
+  deploy_group: "deploy",
+  app_user: "app",
+  app_group: "app"
+```
+
+Assume that the runtime config will be a TOML file in `/etc/mix-systemd-deploy/config.toml`.
+On a simple deploy to a single system, you can just copy the file over.
+
+In a cloud system, we would copy them over at runtime, so we enable the
 `deploy-sync-config-s3` script and tell it which S3 bucket to read from with
 the `CONFIG_S3_BUCKET` and `CONFIG_S3_PREFIX` environment vars.
 
-Setting `DEFAULT_COOKIE_FILE` assumes that the file is generated and put into
-`/etc/mix-systemd-deploy/erlang.cookie`. If you don't set this, the Erlang VM
-will genrate a cookie and put it in `$HOME/.erlang.cookie`. Setting it means
-that you cqn connect remotely to the server with this cookie, and machines in the
-cluster use the cookie.
+```shell
+apt install awscli
+```
+
+### Setting unique node name
+
+If the app runs in a cluster, we need to set a unique node name.
+
+In `rel/vm.args`, comment out
+
+    -name <%= release_name %>@127.0.0.1
+
+And uncomment:
+
+    -name <%= release_name %>@${DEFAULT_IPV4}
+
+We use `cloud-init` to get the runtime configuration. It gets information about the machine
+and writes it to `/run/cloud-init/instance-data.json`. The `deploy-runtime-environment-wrap`.
+script reads this file on startup and uses it to set the `DEFAULT_IPV4` environment var.
+With the environment var `REPLACE_OS_VARS=true`, Distillery replaces the variable in `rel/vm.args`
+with the value on startup.
+
+The scripts `jq` to parse the `cloud-init` data, so install it:
+
+```shell
+apt install jq
+```
+
+In `config/prod.exs` for `mix_systemd` we set `runtime_environment_wrap: true`
+and `env_vars: ["REPLACE_OS_VARS=true"]`, e.g.
 
 ```elixir
 config :mix_systemd,
@@ -206,7 +243,6 @@ config :mix_systemd,
   runtime_environment_wrap: true,
   env_vars: [
     "REPLACE_OS_VARS=true",
-    "DEFAULT_COOKIE_FILE=/etc/mix-systemd-deploy/erlang.cookie",
     "CONFIG_S3_BUCKET=cogini-test",
     "CONFIG_S3_PREFIX=mix-systemd-deploy",
   ],
@@ -255,11 +291,27 @@ hooks:
       timeout: 3600
 ```
 
+For a deploy to the local system:
+
+```shell
+sudo bin/deploy-create-users
+
+sudo cp bin/* /srv/mix-systemd-deploy/bin
+```
+
 Add secrets:
 
 `/etc/mix-systemd-deploy/config.toml`
 
 See `config/config.toml.sample`
+
+```shell
+sudo mkdir /etc/mix-systemd-deploy
+sudo chown app:app /etc/mix-systemd-deploy
+sudo cp config/config.toml /etc/mix-systemd-deploy/
+sudo chown app:app /etc/mix-systemd-deploy/config.toml
+sudo chmod 640 /etc/mix-systemd-deploy/config.toml
+```
 
 `/etc/mix-systemd-deploy/erlang.cookie`
 
@@ -275,4 +327,11 @@ Install build deps, e.g. with [ASDF](https://asdf-vm.com/#/core-manage-asdf-vm).
 ```shell
 mix deps.get
 (cd assets && npm install && node node_modules/webpack/bin/webpack.js --mode development)
+```
+
+```shell
+sudo mkdir /run/mix-systemd-deploy
+sudo chown app:app /run/mix-systemd-deploy
+sudo chmod 750 /run/mix-systemd-deploy
+sudo bin/deploy-runtime-environment-file
 ```
