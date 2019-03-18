@@ -71,10 +71,10 @@ Generate output files under your project's `bin` direcory:
 
 ```shell
 MIX_ENV=prod mix deploy.generate
+chmod +x bin/*
 ```
 
 Check in files under `rel/templates` and `bin` to source control.
-
 
 ## Configure system
 
@@ -269,3 +269,10 @@ mix phx.gen.secret 32
 
 The wrapper script `deploy-runtime-environment-file` generates
 `/run/mix-systemd-deploy/runtime-environment`.
+
+Install build deps, e.g. with [ASDF](https://asdf-vm.com/#/core-manage-asdf-vm).
+
+```shell
+mix deps.get
+(cd assets && npm install && node node_modules/webpack/bin/webpack.js --mode development)
+```
