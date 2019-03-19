@@ -17,9 +17,9 @@ if [ -f "$HOME/.asdf/asdf.sh" ]; then
 fi
 
 echo "===> Installing hex, rebar"
-# mix local.rebar --force
-# mix local.hex --force
-mix local.hex --if-missing
-mix local.rebar --if-missing
+mix local.rebar --force
+mix local.hex --force
+# mix local.hex --if-missing
+# mix local.rebar --if-missing
 
 exit 0
