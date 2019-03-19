@@ -30,4 +30,12 @@ echo "Building digest"
 mix phx.digest
 
 echo "===> Building release"
-mix release
+mix release --verbose
+
+echo "===> Generating systemd files"
+mix systemd.generate
+
+echo "===> Generating deploy files"
+mix deploy.generate
+
+chmod +x "$BINDIR/*"
