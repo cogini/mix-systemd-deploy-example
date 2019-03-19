@@ -4,26 +4,30 @@
 
 set -e
 
-if [ ! -z "$BUILD_DIR" ]; then
-    cd "$BUILD_DIR" || exit 1
-fi
-
 export LANG="${LANG:-en_US.UTF-8}"
+export MIX_ENV="${MIX_ENV:-prod}"
 
-APPLICATION_NAME="${APPLICATION_NAME:-cloud_native}"
-ENVIRONMENT_NAME="${ENVIRONMENT_NAME:-prod}"
-COMPONENT_NAME="${COMPONENT_NAME:-app}"
-CONFIG_S3_BUCKET="${CONFIG_S3_BUCKET:-$APPLICATION_NAME-$ENVIRONMENT_NAME-$COMPONENT_NAME-config}"
+CURDIR="$PWD"
+BINDIR=$(dirname "$0")
+cd "$BINDIR"; BINDIR="$PWD"; cd "$CURDIR"
 
+BASEDIR="$BINDIR/.."
+cd "$BASEDIR"
 
 echo "==> Running build task"
 
-ENVIRONMENT_FILE="rel/etc/environment"
-echo "===> Generating $ENVIRONMENT_FILE"
-echo "APPLICATION_NAME=${APPLICATION_NAME}" > "$ENVIRONMENT_FILE"
-echo "ENVIRONMENT_NAME=${ENVIRONMENT_NAME}" >> "$ENVIRONMENT_FILE"
-echo "COMPONENT_NAME=${COMPONENT_NAME}" >> "$ENVIRONMENT_FILE"
-echo "CONFIG_S3_BUCKET=${CONFIG_S3_BUCKET}" >> "$ENVIRONMENT_FILE"
+echo "===> Updating Elixir libs"
+mix deps.get --only "$MIX_ENV"
+
+echo "===> Compiling"
+mix compile
+
+echo "===> Generating assets"
+# (cd assets && npm install && node node_modules/brunch/bin/brunch build)
+(cd assets && npm install && node node_modules/webpack/bin/webpack.js --mode development)
+
+echo "Building digest"
+mix phx.digest
 
 echo "===> Building release"
 make release
