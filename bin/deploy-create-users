@@ -7,7 +7,7 @@ set -e
 export LANG="en_US.UTF-8"
 
 # Config vars
-DEPLOY_USER="${DEPLOY_USER:-jake}"
+DEPLOY_USER="${DEPLOY_USER:-deploy}"
 APP_USER="${APP_USER:-app}"
 
 if [ ! id -u "$DEPLOY_USER" &>/dev/null ]; then

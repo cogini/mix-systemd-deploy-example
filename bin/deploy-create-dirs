@@ -6,8 +6,8 @@ set -e
 
 export LANG="en_US.UTF-8"
 
-DEPLOY_USER="${DEPLOY_USER:-jake}"
-DEPLOY_GROUP="${DEPLOY_GROUP:-jake}"
+DEPLOY_USER="${DEPLOY_USER:-deploy}"
+DEPLOY_GROUP="${DEPLOY_GROUP:-deploy}"
 APP_USER="${APP_USER:-app}"
 APP_GROUP="${APP_GROUP:-app}"
 

@@ -14,7 +14,7 @@ VERSION="${VERSION:-0.1.0}"
 # Config vars
 DEPLOY_DIR="/srv/mix-systemd-deploy"
 APP_NAME="mix_systemd_deploy"
-DEPLOY_USER="${DEPLOY_USER:-jake}"
+DEPLOY_USER="${DEPLOY_USER:-deploy}"
 APP_GROUP="${APP_USER:-app}"
 
 CURRENT_LINK="${DESTDIR}${DEPLOY_DIR}/current"
