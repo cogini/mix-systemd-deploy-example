@@ -58,6 +58,14 @@ config :logger, level: :info
 
 config :phoenix, :serve_endpoints, true
 
+# Alternatively, you can configure exactly which server to
+# start per endpoint:
+#
+#     config :mix_systemd_deploy, MixSystemdDeployWeb.Endpoint, server: true
+#
+# Note you can't rely on `System.get_env/1` when using releases.
+# See the releases documentation accordingly.
+
 config :mix_deploy,
   app_user: "app",
   app_group: "app"
@@ -89,14 +97,6 @@ config :mix_systemd,
 #  exec_start_pre: [
 #     "deploy-sync-config-s3"
 #  ]
-
-# Alternatively, you can configure exactly which server to
-# start per endpoint:
-#
-#     config :mix_systemd_deploy, MixSystemdDeployWeb.Endpoint, server: true
-#
-# Note you can't rely on `System.get_env/1` when using releases.
-# See the releases documentation accordingly.
 
 # Finally import the config/prod.secret.exs which should be versioned
 # separately.
