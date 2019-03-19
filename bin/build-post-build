@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+# post_build task
+
+set -e
+
+if [ ! -z "$BUILD_DIR" ]; then
+    cd "$BUILD_DIR" || exit 1
+fi
+
+export LANG="${LANG:-en_US.UTF-8}"
+
+echo "==> Running post_build task"
+make post_build
+
+exit 0

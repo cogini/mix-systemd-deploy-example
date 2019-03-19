@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+
+# Install Erlang, Elixir and Node.js from ASDF on CentOS
+
+set -e
+
+ERL_VERSION="${ERL_VERSION:-21.3}"
+ELIXIR_VERSION="${ELIXIR_VERSION:-1.8.0}"
+
+export LANG="${LANG:-en_US.UTF-8}"
+
+
+echo "==> Initialize package manager and install basic utilities"
+
+echo "===> Installing EPEL repository"
+wget --no-verbose -P /tmp https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+yum install -q -y /tmp/epel-release-latest-7.noarch.rpm
+
+echo "===> Updating package repos"
+yum update -y -q
+
+echo "===> Updating system packages"
+yum upgrade -y -q --enablerepo=epel
+
+echo "===> Installing utilities"
+yum install -y -q wget curl unzip make git
+
+
+echo "==> Install ASDF plugin dependencies"
+
+echo "===> Installing common ASDF plugin deps"
+yum install -y -q automake autoconf readline-devel ncurses-devel openssl-devel \
+    libyaml-devel libxslt-devel libffi-devel libtool unixODBC-devel
+
+echo "===> Installing ASDF Erlang plugin deps"
+groupinstall -y 'Development Tools' 'C Development Tools and Libraries'
+yum install -y -q wxGTK3-devel wxBase3 openssl-devel libxslt \
+    java-1.8.0-openjdk-devel libiodbc unixODBC erlang-odbc
+
+echo "===> Installing ASDF Node.js plugin deps"
+yum install -y -q install gpg perl perl-Digest-SHA
+
+
+echo "==> Install ASDF and plugins"
+
+echo "===> Installing ASDF"
+git clone https://github.com/asdf-vm/asdf.git "$HOME/.asdf" --branch v0.6.3
+echo -e '\n. $HOME/.asdf/asdf.sh' >> "$HOME/.bashrc"
+echo -e '\n. $HOME/.asdf/completions/asdf.bash' >> "$HOME/.bashrc"
+
+source "$HOME/.asdf/asdf.sh"
+
+echo "===> Installing ASDF erlang plugin"
+asdf plugin-add erlang
+
+echo "===> Installing ASDF elixir plugin"
+asdf plugin-add elixir
+
+echo "===> Installing ASDF nodejs plugin"
+asdf plugin-add nodejs
+
+echo "===> Importing Node.js release team OpenPGP keys to main keyring"
+# This can be flaky
+bash ~/.asdf/plugins/nodejs/bin/import-release-team-keyring
+
+echo "===> Installing build deps with ASDF"
+asdf install
+# There may be problem with plugin return codes
+asdf install
+
+exit 0

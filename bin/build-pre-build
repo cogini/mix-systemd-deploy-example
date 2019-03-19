@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+# pre_build task
+
+set -e
+
+if [ ! -z "$BUILD_DIR" ]; then
+    cd "$BUILD_DIR" || exit 1
+fi
+
+export LANG="${LANG:-en_US.UTF-8}"
+
+echo "==> Running pre_build task"
+
+if [ -f "$HOME/.asdf/asdf.sh" ]; then
+    source "$HOME/.asdf/asdf.sh"
+fi
+
+echo "===> Installing hex, rebar"
+# mix local.rebar --force
+# mix local.hex --force
+mix local.hex --if-missing
+mix local.rebar --if-missing
+
+exit 0
