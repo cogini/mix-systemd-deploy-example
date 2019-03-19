@@ -34,6 +34,9 @@ apt-get -qq install wget curl unzip make git
 
 echo "==> Install Erlang, Elixir and Node.js from packages"
 
+# Get UBUNTU_CODENAME
+source /etc/os-release
+
 echo "===> Installing Erlang package deps"
 apt-get -qq install procps libc6 libncurses5 libssl1.0 libgcc1 libstdc++6 libsctp1 libwxbase3.0-0v5 libwxgtk3.0-0v5
 apt-get -f install
