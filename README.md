@@ -33,7 +33,7 @@ defp deps do
 end
 ```
 
-Generate initial files in the `rel` dir:
+Generate initial distillery config files in the `rel` dir:
 
 ```shell
 mix release.init
@@ -74,7 +74,7 @@ MIX_ENV=prod mix deploy.generate
 chmod +x bin/*
 ```
 
-Check files under `rel/templates` and `bin` into source control.
+Optionally check the files under `rel/templates` and `bin` into source control.
 
 ## Configure system
 
@@ -221,11 +221,12 @@ And uncomment:
 
     -name <%= release_name %>@${DEFAULT_IPV4}
 
-We use `cloud-init` to get the runtime configuration. It gets information about the machine
-and writes it to `/run/cloud-init/instance-data.json`. The `deploy-runtime-environment-wrap`.
-script reads this file on startup and uses it to set the `DEFAULT_IPV4` environment var.
-With the environment var `REPLACE_OS_VARS=true`, Distillery replaces the variable in `rel/vm.args`
-with the value on startup.
+We use [cloud-init](https://cloudinit.readthedocs.io/en/latest/) to get the
+runtime configuration. It gets information about the machine and writes it to
+`/run/cloud-init/instance-data.json`. The `deploy-runtime-environment-wrap`.
+script reads this file on startup and uses it to set the `DEFAULT_IPV4`
+environment var.  With the environment var `REPLACE_OS_VARS=true`, Distillery
+replaces the variable in `rel/vm.args` with the value on startup.
 
 The scripts `jq` to parse the `cloud-init` data, so install it:
 
