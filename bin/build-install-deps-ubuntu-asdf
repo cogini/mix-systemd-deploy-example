@@ -31,6 +31,8 @@ apt-get -qq install dialog apt-utils
 echo "===> Installing utilities"
 apt-get -qq install wget curl unzip make git
 
+# http://erlang.org/doc/installation_guide/INSTALL.html#required-utilities
+# https://github.com/asdf-vm/asdf-erlang
 
 echo "==> Install ASDF plugin dependencies"
 
