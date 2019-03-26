@@ -16,7 +16,7 @@ export DEBIAN_FRONTEND=noninteractive
 # echo 'Dpkg::Use-Pty "0";' > /etc/apt/apt.conf.d/00usepty
 
 echo "===> Updating package repos"
-apt-get update -q
+apt-get update -qq
 
 echo "===> Installing locale $LANG"
 LANG=C apt-get -qq install locales
