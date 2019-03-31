@@ -9,8 +9,42 @@ if [ ! -z "$BUILD_DIR" ]; then
 fi
 
 export LANG="${LANG:-en_US.UTF-8}"
+DESTDIR="${DESTDIR:-files}"
+ASSETS_S3_BUCKET="${ASSETS_S3_BUCKET:-cogini-foo-dev-app-assets}"
 
 echo "==> Running post_build task"
-make post_build
+
+mkdir -p "$(DESTDIR)"
+cp -v appspec.yml $(DESTDIR)
+
+cp -v "_build/$(MIX_ENV)/rel/$(APP_NAME)/releases/$(VERSION)/$(APP_NAME).tar.gz" "$(DESTDIR)/$(APP_NAME).tar.gz"
+
+mkdir -p $(DESTDIR)/systemd
+cp -v _build/$(MIX_ENV)/systemd/lib/systemd/system/* "$(DESTDIR)/systemd"
+
+mkdir -p "$(DESTDIR)/bin"
+cp bin/deploy-stop $(DESTDIR)/bin
+cp bin/deploy-create-users $(DESTDIR)/bin
+cp bin/deploy-clean-target $(DESTDIR)/bin
+cp bin/deploy-extract-release $(DESTDIR)/bin
+cp bin/deploy-migrate $(DESTDIR)/bin
+cp bin/deploy-enable $(DESTDIR)/bin
+cp bin/deploy-set-perms $(DESTDIR)/bin
+cp bin/deploy-set-cookie-ssm $(DESTDIR)/bin
+cp bin/deploy-start $(DESTDIR)/bin
+cp bin/deploy-restart $(DESTDIR)/bin
+cp bin/validate-service $(DESTDIR)/bin
+cp bin/deploy-runtime-environment-wrap $(DESTDIR)/bin
+cp bin/deploy-remote-console $(DESTDIR)/bin
+
+# aws configure set default.region ${AWS_DEFAULT_REGION}
+# aws s3 cp priv/static s3://${ASSETS_BUCKET} --recursive
+aws s3 sync priv/static s3://$(ASSETS_S3_BUCKET)
+
+# mkdir -p "$(DESTDIR)/static-assets"
+# cp -R priv/static/* "$(DESTDIR)/static-assets"
+
+# mkdir -p $(DESTDIR)/etc
+# cp rel/etc/environment $(DESTDIR)/etc/environment
 
 exit 0
