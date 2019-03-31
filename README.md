@@ -5,19 +5,20 @@ This is a working example Elixir app which shows how to deploy using
 `mix_systemd` generates a [systemd unit file](https://www.freedesktop.org/software/systemd/man/systemd.unit.html)
 which supervises and manages your app according to standard conventions.
 
-`mix_deploy` generates scripts which are called by systemd during startup and provides lifecycle hooks for deployment
-systems like [AWS CodeDeploy](https://aws.amazon.com/codedeploy/).
+`mix_deploy` generates scripts which are used to deploy your app. It includes scripts to
+set up the initial system and deploy subsequent updates. It supports local deployment and
+systems like [AWS CodeDeploy](https://aws.amazon.com/codedeploy/), as well as scripts which
+are called during startup to handle configuration.
 
-This repo is built as a series of git commits, so you can see how it works step by step.
-
-It starts with a default Phoenix project with PostgreSQL database.
+This repo is built as a series of git commits, so you can see how it works step
+by step. TODO
 
 # Changes
 
 Following are the steps used to set up this repo. You can do the same to add
 it to your own project.
 
-It all began with a new Phoenix project:
+It starts with a default Phoenix project:
 
 ```shell
 mix phx.new mix_systemd_deploy
@@ -52,7 +53,7 @@ end
 Initialize templates under the `rel/templates/systemd` directory:
 
 ```shell
-MIX_ENV=prod mix systemd.init
+mix systemd.init
 ```
 
 Generate output files under `_build/#{mix_env}/systemd/lib/systemd/system`.
@@ -64,7 +65,7 @@ MIX_ENV=prod mix systemd.generate
 Initialize templates under `rel/templates/deploy`:
 
 ```shell
-MIX_ENV=prod mix deploy.init
+mix deploy.init
 ```
 
 Generate output files under your project's `bin` direcory:
