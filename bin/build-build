@@ -22,7 +22,7 @@ mix deps.get --only "$MIX_ENV"
 echo "===> Compiling"
 mix compile
 
-echo "===> Installing node moduless"
+echo "===> Installing node modules"
 (cd assets && npm install)
 
 echo "===> Generating assets"
