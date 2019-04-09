@@ -33,14 +33,16 @@ echo "===> Generating assets"
 echo "Building digest files"
 mix phx.digest
 
-echo "===> Building release"
-# mix release --verbose
-mix release
-
 echo "===> Generating systemd files"
+mix systemd.init
 mix systemd.generate
 
 echo "===> Generating deploy files"
+mix deploy.init
 mix deploy.generate
 
 chmod +x bin/*
+
+echo "===> Building release"
+# mix release --verbose
+mix release
