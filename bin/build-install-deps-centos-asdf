@@ -45,25 +45,34 @@ yum install -y -q install gpg perl perl-Digest-SHA
 
 echo "==> Install ASDF and plugins"
 
-echo "===> Installing ASDF"
-git clone https://github.com/asdf-vm/asdf.git "$HOME/.asdf" --branch v0.7
-echo -e '\n. $HOME/.asdf/asdf.sh' >> "$HOME/.bashrc"
-echo -e '\n. $HOME/.asdf/completions/asdf.bash' >> "$HOME/.bashrc"
+if [ ! -d "$HOME/.asdf" ]; then
+    echo "===> Installing ASDF"
+    git clone https://github.com/asdf-vm/asdf.git "$HOME/.asdf" --branch v0.7.1
+
+    echo -e '\n. $HOME/.asdf/asdf.sh' >> ~/.bashrc
+    echo -e '\n. $HOME/.asdf/completions/asdf.bash' >> ~/.bashrc
+fi
 
 source "$HOME/.asdf/asdf.sh"
 
-echo "===> Installing ASDF erlang plugin"
-asdf plugin-add erlang
+if [ ! -d "$ASDF_DIR/plugins/erlang" ]; then
+    echo "===> Installing ASDF erlang plugin"
+    asdf plugin-add erlang
+fi
 
-echo "===> Installing ASDF elixir plugin"
-asdf plugin-add elixir
+if [ ! -d "$ASDF_DIR/plugins/elixir" ]; then
+    echo "===> Installing ASDF elixir plugin"
+    asdf plugin-add elixir
+fi
 
-echo "===> Installing ASDF nodejs plugin"
-asdf plugin-add nodejs
+if [ ! -d "$ASDF_DIR/plugins/nodejs" ]; then
+    echo "===> Installing ASDF nodejs plugin"
+    asdf plugin-add nodejs
 
-echo "===> Importing Node.js release team OpenPGP keys to main keyring"
-# This can be flaky
-bash ~/.asdf/plugins/nodejs/bin/import-release-team-keyring
+    echo "===> Importing Node.js release team OpenPGP keys to main keyring"
+    # This can be flaky
+    bash ~/.asdf/plugins/nodejs/bin/import-release-team-keyring
+fi
 
 echo "===> Installing build deps with ASDF"
 asdf install
