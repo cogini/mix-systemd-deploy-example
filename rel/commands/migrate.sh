@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-release_ctl eval "MixSystemdDeploy.Tasks.migrate(:init.get_plain_arguments())"
+release_ctl eval --mfa "MixSystemdDeploy.Tasks.Migrate.run/1" --argv -- "$@"
