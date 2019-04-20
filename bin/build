@@ -16,6 +16,11 @@ cd "$BASEDIR"
 
 echo "==> Running build task"
 
+echo "===> Installing build deps with ASDF"
+asdf install
+# There may be problem with plugin return codes so run it twice
+asdf install
+
 echo "===> Updating Elixir libs"
 mix deps.get --only "$MIX_ENV"
 
