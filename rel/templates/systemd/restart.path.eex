@@ -1,9 +1,0 @@
-# https://www.freedesktop.org/software/systemd/man/systemd.path.html
-
-[Path]
-PathModified=<%= flags_dir %>/restart.flag
-# MakeDirectory=true
-# DirectoryMode=0750
-
-[Install]
-WantedBy=multi-user.target
