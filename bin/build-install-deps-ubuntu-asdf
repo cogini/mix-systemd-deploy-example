@@ -4,11 +4,8 @@
 
 set -e
 
-ERL_VERSION="${ERL_VERSION:-21.3}"
-ELIXIR_VERSION="${ELIXIR_VERSION:-1.8.0}"
-
+# Environment vars
 export LANG="${LANG:-en_US.UTF-8}"
-
 
 echo "==> Initialize package manager and install basic utilities"
 

@@ -4,9 +4,7 @@
 
 set -e
 
-ERL_VERSION="${ERL_VERSION:-21.3}"
-ELIXIR_VERSION="${ELIXIR_VERSION:-1.8.0}"
-
+# Environment vars
 export LANG="${LANG:-en_US.UTF-8}"
 
 echo "==> Initialize package manager and install basic utilities"
@@ -31,6 +29,10 @@ brew install gpg
 
 echo "==> Install ASDF and plugins"
 
+# The following installs ASDF from git to be more consistent with Linux
+#
+# You can also use Homebrew:
+#
 # brew install asdf
 # echo -e '\n. $(brew --prefix asdf)/asdf.sh' >> ~/.bash_profile
 # echo -e '\n. $(brew --prefix asdf)/etc/bash_completion.d/asdf.bash' >> ~/.bash_profile
