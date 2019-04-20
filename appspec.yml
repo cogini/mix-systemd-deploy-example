@@ -34,6 +34,7 @@ hooks:
       timeout: 300
   BeforeInstall:
     - location: bin/deploy-create-users
+    - location: bin/deploy-create-dirs
     - location: bin/deploy-clean-target
   AfterInstall:
     - location: bin/deploy-extract-release
